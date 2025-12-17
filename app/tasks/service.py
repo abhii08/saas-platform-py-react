@@ -131,6 +131,20 @@ class TaskService:
         task = TaskService.get_task(db, task_id, organization_id)
         
         update_data = data.model_dump(exclude_unset=True)
+        
+        # If board_id is being updated, validate the new board belongs to same organization
+        if 'board_id' in update_data and update_data['board_id'] is not None:
+            board = db.query(Board).filter(
+                Board.id == update_data['board_id'],
+                Board.organization_id == organization_id
+            ).first()
+            
+            if not board:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Board not found"
+                )
+        
         for field, value in update_data.items():
             setattr(task, field, value)
         

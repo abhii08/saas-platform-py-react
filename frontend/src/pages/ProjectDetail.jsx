@@ -3,22 +3,30 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { useAuth } from '../context/AuthContext'
 import ProjectModal from '../components/ProjectModal'
+import TaskModal from '../components/TaskModal'
 import api from '../api/axios'
-import { Edit, Trash2 } from 'lucide-react'
+import { Edit, Trash2, Plus, CheckSquare } from 'lucide-react'
 
 const ProjectDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
   const { isManager } = useAuth()
   const [project, setProject] = useState(null)
+  const [boards, setBoards] = useState([])
+  const [tasks, setTasks] = useState({})
+  const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(true)
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState(null)
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
+  const [selectedTask, setSelectedTask] = useState(null)
 
   useEffect(() => {
     fetchProject()
+    fetchBoards()
+    fetchUsers()
   }, [id])
 
   const fetchProject = async () => {
@@ -32,6 +40,36 @@ const ProjectDetail = () => {
     }
   }
 
+  const fetchBoards = async () => {
+    try {
+      const response = await api.get(`/boards/project/${id}`)
+      setBoards(response.data)
+      response.data.forEach(board => {
+        fetchTasksForBoard(board.id)
+      })
+    } catch (error) {
+      console.error('Error fetching boards:', error)
+    }
+  }
+
+  const fetchTasksForBoard = async (boardId) => {
+    try {
+      const response = await api.get(`/tasks/board/${boardId}`)
+      setTasks(prev => ({ ...prev, [boardId]: response.data }))
+    } catch (error) {
+      console.error('Error fetching tasks:', error)
+    }
+  }
+
+  const fetchUsers = async () => {
+    try {
+      const response = await api.get('/users')
+      setUsers(response.data.items || [])
+    } catch (error) {
+      console.error('Error fetching users:', error)
+    }
+  }
+
   const handleUpdateProject = async (formData) => {
     await api.put(`/projects/${id}`, formData)
     fetchProject()
@@ -41,17 +79,56 @@ const ProjectDetail = () => {
     setIsDeleting(true)
     setDeleteError(null)
     try {
-      console.log('Attempting to delete project:', id)
-      const response = await api.delete(`/projects/${id}`)
-      console.log('Delete response:', response)
+      await api.delete(`/projects/${id}`)
       navigate('/projects')
     } catch (error) {
       console.error('Error deleting project:', error)
-      console.error('Error response:', error.response)
       const errorMessage = error.response?.data?.detail || error.message || 'Failed to delete project. Please try again.'
       setDeleteError(errorMessage)
       setIsDeleting(false)
     }
+  }
+
+  const handleCreateTask = async (formData) => {
+    await api.post('/tasks', formData)
+    fetchTasksForBoard(formData.board_id)
+  }
+
+  const handleUpdateTask = async (formData) => {
+    await api.put(`/tasks/${selectedTask.id}`, formData)
+    fetchTasksForBoard(formData.board_id)
+    setSelectedTask(null)
+  }
+
+  const handleDeleteTask = async (taskId, boardId) => {
+    if (window.confirm('Are you sure you want to delete this task?')) {
+      try {
+        await api.delete(`/tasks/${taskId}`)
+        fetchTasksForBoard(boardId)
+      } catch (error) {
+        console.error('Error deleting task:', error)
+      }
+    }
+  }
+
+  const getStatusColor = (status) => {
+    const colors = {
+      TODO: 'bg-gray-100 text-gray-800',
+      IN_PROGRESS: 'bg-blue-100 text-blue-800',
+      IN_REVIEW: 'bg-yellow-100 text-yellow-800',
+      DONE: 'bg-green-100 text-green-800'
+    }
+    return colors[status] || 'bg-gray-100 text-gray-800'
+  }
+
+  const getPriorityColor = (priority) => {
+    const colors = {
+      LOW: 'bg-gray-100 text-gray-600',
+      MEDIUM: 'bg-blue-100 text-blue-600',
+      HIGH: 'bg-orange-100 text-orange-600',
+      URGENT: 'bg-red-100 text-red-600'
+    }
+    return colors[priority] || 'bg-gray-100 text-gray-600'
   }
 
   if (loading) {
@@ -119,6 +196,82 @@ const ProjectDetail = () => {
             </div>
           </dl>
         </div>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Tasks</h2>
+            <button
+              onClick={() => {
+                console.log('Opening task modal, boards:', boards)
+                console.log('Boards length:', boards.length)
+                setSelectedTask(null)
+                setIsTaskModalOpen(true)
+              }}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
+            >
+              <Plus className="w-4 h-4" />
+              New Task
+            </button>
+          </div>
+
+          {boards.length === 0 ? (
+            <div className="text-center py-8">
+              <CheckSquare className="mx-auto h-12 w-12 text-gray-400" />
+              <p className="mt-2 text-sm text-gray-500">No boards found. Create boards to organize tasks.</p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {boards.map(board => (
+                <div key={board.id} className="border rounded-lg p-4">
+                  <h3 className="text-lg font-medium text-gray-900 mb-3">{board.name}</h3>
+                  {board.description && (
+                    <p className="text-sm text-gray-500 mb-3">{board.description}</p>
+                  )}
+                  <div className="space-y-2">
+                    {tasks[board.id]?.length > 0 ? (
+                      tasks[board.id].map(task => (
+                        <div
+                          key={task.id}
+                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
+                          onClick={() => {
+                            setSelectedTask(task)
+                            setIsTaskModalOpen(true)
+                          }}
+                        >
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2">
+                              <h4 className="text-sm font-medium text-gray-900">{task.title}</h4>
+                              <span className={`px-2 py-1 text-xs rounded ${getStatusColor(task.status)}`}>
+                                {task.status.replace('_', ' ')}
+                              </span>
+                              <span className={`px-2 py-1 text-xs rounded ${getPriorityColor(task.priority)}`}>
+                                {task.priority}
+                              </span>
+                            </div>
+                            {task.description && (
+                              <p className="text-xs text-gray-500 mt-1">{task.description}</p>
+                            )}
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteTask(task.id, board.id)
+                            }}
+                            className="text-red-600 hover:text-red-800"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-sm text-gray-500 text-center py-4">No tasks in this board</p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       <ProjectModal
@@ -126,6 +279,18 @@ const ProjectDetail = () => {
         onClose={() => setIsEditModalOpen(false)}
         onSubmit={handleUpdateProject}
         project={project}
+      />
+
+      <TaskModal
+        isOpen={isTaskModalOpen}
+        onClose={() => {
+          setIsTaskModalOpen(false)
+          setSelectedTask(null)
+        }}
+        onSubmit={selectedTask ? handleUpdateTask : handleCreateTask}
+        task={selectedTask}
+        boards={boards}
+        users={users}
       />
 
       {showDeleteConfirm && (

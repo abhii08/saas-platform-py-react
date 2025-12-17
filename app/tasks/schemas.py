@@ -24,6 +24,7 @@ class TaskUpdate(BaseModel):
     """Schema for updating a task."""
     title: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = None
+    board_id: Optional[int] = None
     status: Optional[TaskStatus] = None
     priority: Optional[TaskPriority] = None
     assigned_to: Optional[int] = None
