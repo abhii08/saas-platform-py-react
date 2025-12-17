@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { useAuth } from '../context/AuthContext'
+import ProjectModal from '../components/ProjectModal'
 import api from '../api/axios'
 import { Plus, FolderKanban } from 'lucide-react'
 
@@ -9,6 +10,7 @@ const Projects = () => {
   const { isManager } = useAuth()
   const [projects, setProjects] = useState([])
   const [loading, setLoading] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     fetchProjects()
@@ -25,13 +27,21 @@ const Projects = () => {
     }
   }
 
+  const handleCreateProject = async (formData) => {
+    await api.post('/projects', formData)
+    fetchProjects()
+  }
+
   return (
     <Layout>
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold text-gray-900">Projects</h1>
           {isManager && (
-            <button className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+            >
               <Plus className="w-5 h-5" />
               New Project
             </button>
@@ -78,6 +88,12 @@ const Projects = () => {
           </div>
         )}
       </div>
+
+      <ProjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreateProject}
+      />
     </Layout>
   )
 }

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import Layout from '../components/Layout'
 import { useAuth } from '../context/AuthContext'
+import ProjectModal from '../components/ProjectModal'
 import api from '../api/axios'
 import { FolderKanban, CheckSquare, Users, TrendingUp } from 'lucide-react'
 
@@ -12,6 +13,7 @@ const Dashboard = () => {
     members: 0
   })
   const [loading, setLoading] = useState(true)
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -34,6 +36,11 @@ const Dashboard = () => {
 
     fetchStats()
   }, [])
+
+  const handleCreateProject = async (formData) => {
+    await api.post('/projects', formData)
+    fetchStats()
+  }
 
   const statCards = [
     { title: 'Total Projects', value: stats.projects, icon: FolderKanban, color: 'bg-blue-500' },
@@ -78,7 +85,10 @@ const Dashboard = () => {
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className={`grid grid-cols-1 gap-4 ${isManager ? 'sm:grid-cols-3' : 'sm:grid-cols-2'}`}>
             {isManager && (
-              <button className="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90">
+              <button 
+                onClick={() => setIsModalOpen(true)}
+                className="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90"
+              >
                 Create New Project
               </button>
             )}
@@ -93,6 +103,12 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      <ProjectModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleCreateProject}
+      />
     </Layout>
   )
 }
