@@ -96,17 +96,13 @@ const TaskModal = ({ isOpen, onClose, onSubmit, task = null, boards = [], users 
         })
       }
       
-      console.log('Submitting task data:', submitData)
       await onSubmit(submitData)
       onClose()
     } catch (error) {
-      console.error('Task submission error:', error)
-      console.error('Error response data:', error.response?.data)
       let errorMessage = 'An error occurred. Please try again.'
       
       if (error.response?.data?.detail) {
         const detail = error.response.data.detail
-        console.log('Validation error detail:', detail)
         // Handle FastAPI validation errors (array of error objects)
         if (Array.isArray(detail)) {
           errorMessage = detail.map(err => err.msg || JSON.stringify(err)).join(', ')

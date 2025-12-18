@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { LayoutDashboard, FolderKanban, CheckSquare, LogOut, Menu } from 'lucide-react'
 import { useState } from 'react'
