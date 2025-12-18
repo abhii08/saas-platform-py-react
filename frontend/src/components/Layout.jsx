@@ -21,7 +21,7 @@ const Layout = ({ children }) => {
               </button>
               <Link to="/dashboard" className="flex ml-2 md:mr-24">
                 <span className="self-center text-xl font-semibold sm:text-2xl whitespace-nowrap text-primary">
-                  SaaS Platform
+                  TenantWorks
                 </span>
               </Link>
             </div>
