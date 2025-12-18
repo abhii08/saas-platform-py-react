@@ -26,31 +26,31 @@ def seed_data():
         manager_role = db.query(Role).filter(Role.name == "PROJECT_MANAGER").first()
         member_role = db.query(Role).filter(Role.name == "MEMBER").first()
         
-        org1 = Organization(name="Acme Corporation", slug="acme-corp", is_active=True)
+        org1 = Organization(name="Fxis.ai Corporation", slug="fxis-corp", is_active=True)
         org2 = Organization(name="Tech Startup Inc", slug="tech-startup", is_active=True)
         db.add_all([org1, org2])
         db.flush()
         
         user1 = User(
-            email="admin@acme.com",
-            password_hash=get_password_hash("password123"),
-            first_name="John",
+            email="admin@fxis.ai",
+            password_hash=get_password_hash("admin123"),
+            first_name="Hemen",
             last_name="Admin",
             is_active=True,
             is_verified=True
         )
         user2 = User(
-            email="manager@acme.com",
-            password_hash=get_password_hash("password123"),
-            first_name="Jane",
+            email="manager@fxis.ai",
+            password_hash=get_password_hash("manager123"),
+            first_name="Husain",
             last_name="Manager",
             is_active=True,
             is_verified=True
         )
         user3 = User(
-            email="member@acme.com",
-            password_hash=get_password_hash("password123"),
-            first_name="Bob",
+            email="member@fxis.ai",
+            password_hash=get_password_hash("member123"),
+            first_name="Abhinav",
             last_name="Member",
             is_active=True,
             is_verified=True
@@ -140,9 +140,9 @@ def seed_data():
         db.commit()
         print("Database seeded successfully!")
         print("\nSample credentials:")
-        print("  Admin: admin@acme.com / password123")
-        print("  Manager: manager@acme.com / password123")
-        print("  Member: member@acme.com / password123")
+        print("  Admin: admin@fxis.ai / admin123")
+        print("  Manager: manager@fxis.ai / manager123")
+        print("  Member: member@fxis.ai / member123")
         
     except Exception as e:
         print(f"Error seeding database: {e}")

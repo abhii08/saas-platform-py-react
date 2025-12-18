@@ -34,7 +34,7 @@ API Documentation: http://localhost:8000/docs
 
 ```bash
 # Navigate to project root
-cd c:\Users\ABHIN\Projects\Python\project-windsurf
+cd c:\Users\ABHIN\Projects\Python\SaaS-Platform
 
 # Create virtual environment
 python -m venv venv
@@ -188,7 +188,7 @@ curl -X GET http://localhost:8000/api/v1/projects \
 ## Project Structure
 
 ```
-project-windsurf/
+SaaS-Platform/
 ├── app/                      # Backend application
 │   ├── main.py              # FastAPI app entry point
 │   ├── core/                # Core configuration

@@ -1,6 +1,6 @@
 # Multi-Tenant SaaS Project Management Platform
 
-A production-ready, multi-tenant Saaas platform built with FastAPI, React, and PostgreSQL.
+A production-ready, multi-tenant SaaS platform built with FastAPI, React, and PostgreSQL.
 
 ## Features
 
@@ -19,7 +19,13 @@ A production-ready, multi-tenant Saaas platform built with FastAPI, React, and P
 - PostgreSQL
 
 **Frontend:**
-- React
+- React 18.2
+- Vite (Build tool)
+- React Router v6
+- TailwindCSS (Styling)
+- Radix UI (Components)
+- Lucide React (Icons)
+- Axios (HTTP client)
 - JWT Authentication
 - Role-based UI
 
@@ -29,7 +35,36 @@ A production-ready, multi-tenant Saaas platform built with FastAPI, React, and P
 React → FastAPI → Services → SQLAlchemy → PostgreSQL
 ```
 
-## Quick Start
+## Quick Start with Docker (Recommended)
+
+1. **Start the services:**
+```bash
+docker-compose up
+```
+
+2. **Initialize the database:**
+```bash
+docker exec -it saas_backend python scripts/init_db.py
+```
+
+3. **Seed sample data (optional):**
+```bash
+docker exec -it saas_backend python scripts/seed_data.py
+```
+
+4. **Access the application:**
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
+- Frontend: http://localhost:5173
+
+### Sample Credentials (after seeding)
+```
+Admin:    admin@fxis.ai / admin123
+Manager:  manager@fxis.ai / manager123
+Member:   member@fxis.ai / member123
+```
+
+## Manual Setup (Without Docker)
 
 ### Backend Setup
 
@@ -44,24 +79,52 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-3. Set up environment variables:
+3. Set up PostgreSQL database:
+```bash
+creatdb saas_db
+```
+
+4. Set up environment variables:
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
-4. Run database migrations:
+5. Initialize database:
 ```bash
-alembic upgrade head
+python scripts/init_db.py
 ```
 
-5. Start the server:
+6. Seed sample data (optional):
+```bash
+python scripts/seed_data.py
+```
+
+7. Start the server:
 ```bash
 uvicorn app.main:app --reload
 ```
 
+### Frontend Setup
+
+1. Navigate to frontend directory:
+```bash
+cd frontend
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Start development server:
+```bash
+npm run dev
+```
+
 API will be available at: http://localhost:8000
 API Docs: http://localhost:8000/docs
+Frontend: http://localhost:5173
 
 ## Project Structure
 
@@ -98,21 +161,47 @@ Every database query is automatically scoped to the current tenant (organization
 ## API Endpoints
 
 ### Authentication
-- `POST /api/v1/auth/register` - Register new user
-- `POST /api/v1/auth/login` - Login
+- `POST /api/v1/auth/register` - Register new user and create organization
+- `POST /api/v1/auth/login` - Login and get JWT tokens
 - `POST /api/v1/auth/refresh` - Refresh access token
 
 ### Organizations
 - `GET /api/v1/organizations` - List organizations
 - `POST /api/v1/organizations` - Create organization
-- `GET /api/v1/organizations/{id}` - Get organization
+- `GET /api/v1/organizations/{id}` - Get organization details
+- `PUT /api/v1/organizations/{id}` - Update organization (ORG_ADMIN)
+- `DELETE /api/v1/organizations/{id}` - Delete organization (ORG_ADMIN)
+
+### Users
+- `GET /api/v1/users` - List users in current organization
 
 ### Projects
-- `GET /api/v1/projects` - List projects
-- `POST /api/v1/projects` - Create project
-- `GET /api/v1/projects/{id}` - Get project
-- `PUT /api/v1/projects/{id}` - Update project
-- `DELETE /api/v1/projects/{id}` - Delete project
+- `GET /api/v1/projects` - List projects (paginated)
+- `POST /api/v1/projects` - Create project (MANAGER/ADMIN)
+- `GET /api/v1/projects/{id}` - Get project details
+- `PUT /api/v1/projects/{id}` - Update project (MANAGER/ADMIN)
+- `DELETE /api/v1/projects/{id}` - Soft delete project (MANAGER/ADMIN)
+
+### Boards
+- `GET /api/v1/boards/project/{project_id}` - List boards by project
+- `POST /api/v1/boards` - Create board (MANAGER/ADMIN)
+- `GET /api/v1/boards/{id}` - Get board details
+- `PUT /api/v1/boards/{id}` - Update board (MANAGER/ADMIN)
+- `DELETE /api/v1/boards/{id}` - Delete board (MANAGER/ADMIN)
+
+### Tasks
+- `GET /api/v1/tasks/board/{board_id}` - List tasks by board (with filters)
+- `POST /api/v1/tasks` - Create task
+- `GET /api/v1/tasks/{id}` - Get task details
+- `PUT /api/v1/tasks/{id}` - Update task
+- `DELETE /api/v1/tasks/{id}` - Delete task
+
+### Comments
+- `GET /api/v1/comments/task/{task_id}` - List comments by task
+- `POST /api/v1/comments` - Create comment
+- `GET /api/v1/comments/{id}` - Get comment details
+- `PUT /api/v1/comments/{id}` - Update own comment
+- `DELETE /api/v1/comments/{id}` - Delete own comment
 
 ## Security
 
@@ -122,14 +211,83 @@ Every database query is automatically scoped to the current tenant (organization
 - CORS configuration
 - Rate limiting (planned)
 
+## Database Management
+
+### Access PostgreSQL Container
+```bash
+# Using container name
+docker exec -it saas_postgres psql -U saas_user -d saas_db
+
+# Using container ID
+docker ps  # Get container ID
+docker exec -it <container_id> psql -U saas_user -d saas_db
+```
+
+### Common PostgreSQL Commands
+```sql
+\l                    -- List databases
+\dt                   -- List tables
+\d+ table_name        -- Describe table
+SELECT * FROM users;  -- Query data
+\q                    -- Exit
+```
+
+### Backup and Restore
+```bash
+# Backup
+docker exec saas_postgres pg_dump -U saas_user saas_db > backup.sql
+
+# Restore
+docker exec -i saas_postgres psql -U saas_user -d saas_db < backup.sql
+```
+
+### Reset Database
+```bash
+# Stop and remove volumes (deletes all data)
+docker-compose down -v
+
+# Start fresh
+docker-compose up
+docker exec -it saas_backend python scripts/init_db.py
+docker exec -it saas_backend python scripts/seed_data.py
+```
+
+## Data Model
+
+### Hierarchy
+```
+Organization (Tenant)
+  └── Users (with Roles)
+  └── Projects
+      └── Boards (e.g., Sprint 1, Backlog)
+          └── Tasks (with Status, Priority)
+              └── Comments
+```
+
+### Task Statuses
+- `TODO` - Not started
+- `IN_PROGRESS` - Currently being worked on
+- `IN_REVIEW` - Under review
+- `DONE` - Completed
+- `BLOCKED` - Blocked by dependencies
+
+### Task Priorities
+- `LOW` - Low priority
+- `MEDIUM` - Medium priority
+- `HIGH` - High priority
+- `URGENT` - Urgent priority
+
 ## Deployment
 
 Docker configuration included. See `docker-compose.yml` for details.
 
 ```bash
+# Production deployment
 docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
 ```
-
-## License
-
-MIT

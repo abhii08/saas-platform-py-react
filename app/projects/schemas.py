@@ -12,7 +12,7 @@ class ProjectBase(BaseModel):
 
 class ProjectCreate(ProjectBase):
     """Schema for creating a new project."""
-    pass
+    is_active: Optional[bool] = True
 
 
 class ProjectUpdate(BaseModel):

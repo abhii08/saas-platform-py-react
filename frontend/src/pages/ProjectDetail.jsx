@@ -3,9 +3,10 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
 import { useAuth } from '../context/AuthContext'
 import ProjectModal from '../components/ProjectModal'
+import BoardModal from '../components/BoardModal'
 import TaskModal from '../components/TaskModal'
 import api from '../api/axios'
-import { Edit, Trash2, Plus, CheckSquare } from 'lucide-react'
+import { Edit, Trash2, Plus, CheckSquare, Columns } from 'lucide-react'
 
 const ProjectDetail = () => {
   const { id } = useParams()
@@ -22,6 +23,8 @@ const ProjectDetail = () => {
   const [deleteError, setDeleteError] = useState(null)
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false)
   const [selectedTask, setSelectedTask] = useState(null)
+  const [isBoardModalOpen, setIsBoardModalOpen] = useState(false)
+  const [selectedBoard, setSelectedBoard] = useState(null)
 
   useEffect(() => {
     fetchProject()
@@ -107,6 +110,28 @@ const ProjectDetail = () => {
         fetchTasksForBoard(boardId)
       } catch (error) {
         console.error('Error deleting task:', error)
+      }
+    }
+  }
+
+  const handleCreateBoard = async (formData) => {
+    await api.post('/boards', formData)
+    fetchBoards()
+  }
+
+  const handleUpdateBoard = async (formData) => {
+    await api.put(`/boards/${selectedBoard.id}`, formData)
+    fetchBoards()
+    setSelectedBoard(null)
+  }
+
+  const handleDeleteBoard = async (boardId) => {
+    if (window.confirm('Are you sure you want to delete this board? All tasks in this board will be deleted.')) {
+      try {
+        await api.delete(`/boards/${boardId}`)
+        fetchBoards()
+      } catch (error) {
+        console.error('Error deleting board:', error)
       }
     }
   }
@@ -199,34 +224,83 @@ const ProjectDetail = () => {
 
         <div className="bg-white shadow rounded-lg p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Tasks</h2>
-            <button
-              onClick={() => {
-                console.log('Opening task modal, boards:', boards)
-                console.log('Boards length:', boards.length)
-                setSelectedTask(null)
-                setIsTaskModalOpen(true)
-              }}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
-            >
-              <Plus className="w-4 h-4" />
-              New Task
-            </button>
+            <h2 className="text-xl font-semibold text-gray-900">Boards & Tasks</h2>
+            <div className="flex gap-2">
+              {isManager && (
+                <button
+                  onClick={() => {
+                    setSelectedBoard(null)
+                    setIsBoardModalOpen(true)
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  <Columns className="w-4 h-4" />
+                  New Board
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setSelectedTask(null)
+                  setIsTaskModalOpen(true)
+                }}
+                disabled={boards.length === 0}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Plus className="w-4 h-4" />
+                New Task
+              </button>
+            </div>
           </div>
 
           {boards.length === 0 ? (
             <div className="text-center py-8">
-              <CheckSquare className="mx-auto h-12 w-12 text-gray-400" />
-              <p className="mt-2 text-sm text-gray-500">No boards found. Create boards to organize tasks.</p>
+              <Columns className="mx-auto h-12 w-12 text-gray-400" />
+              <h3 className="mt-2 text-sm font-medium text-gray-900">No boards</h3>
+              <p className="mt-1 text-sm text-gray-500">Create a board to start organizing tasks.</p>
+              {isManager && (
+                <button
+                  onClick={() => {
+                    setSelectedBoard(null)
+                    setIsBoardModalOpen(true)
+                  }}
+                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90"
+                >
+                  <Plus className="w-4 h-4" />
+                  Create First Board
+                </button>
+              )}
             </div>
           ) : (
             <div className="space-y-6">
               {boards.map(board => (
                 <div key={board.id} className="border rounded-lg p-4">
-                  <h3 className="text-lg font-medium text-gray-900 mb-3">{board.name}</h3>
-                  {board.description && (
-                    <p className="text-sm text-gray-500 mb-3">{board.description}</p>
-                  )}
+                  <div className="flex justify-between items-start mb-3">
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-900">{board.name}</h3>
+                      {board.description && (
+                        <p className="text-sm text-gray-500 mt-1">{board.description}</p>
+                      )}
+                    </div>
+                    {isManager && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => {
+                            setSelectedBoard(board)
+                            setIsBoardModalOpen(true)
+                          }}
+                          className="text-gray-600 hover:text-gray-800"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleDeleteBoard(board.id)}
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
                   <div className="space-y-2">
                     {tasks[board.id]?.length > 0 ? (
                       tasks[board.id].map(task => (
@@ -279,6 +353,17 @@ const ProjectDetail = () => {
         onClose={() => setIsEditModalOpen(false)}
         onSubmit={handleUpdateProject}
         project={project}
+      />
+
+      <BoardModal
+        isOpen={isBoardModalOpen}
+        onClose={() => {
+          setIsBoardModalOpen(false)
+          setSelectedBoard(null)
+        }}
+        onSubmit={selectedBoard ? handleUpdateBoard : handleCreateBoard}
+        board={selectedBoard}
+        projectId={parseInt(id)}
       />
 
       <TaskModal
