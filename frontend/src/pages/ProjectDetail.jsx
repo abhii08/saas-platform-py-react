@@ -306,7 +306,7 @@ const ProjectDetail = () => {
                       tasks[board.id].map(task => (
                         <div
                           key={task.id}
-                          className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer"
+                          className="flex items-center justify-between p-3 bg-slate-200 rounded-lg hover:bg-slate-300 cursor-pointer"
                           onClick={() => {
                             setSelectedTask(task)
                             setIsTaskModalOpen(true)
@@ -323,7 +323,7 @@ const ProjectDetail = () => {
                               </span>
                             </div>
                             {task.description && (
-                              <p className="text-xs text-gray-500 mt-1">{task.description}</p>
+                              <p className="text-xs text-gray-600 mt-1">{task.description}</p>
                             )}
                           </div>
                           {isManager && (
