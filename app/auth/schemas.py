@@ -32,8 +32,8 @@ class RegisterRequest(BaseModel):
     password: str = Field(..., min_length=8, max_length=100)
     first_name: Optional[str] = Field(None, max_length=100)
     last_name: Optional[str] = Field(None, max_length=100)
-    organization_name: str = Field(..., min_length=1, max_length=255)
-    organization_slug: str = Field(..., min_length=1, max_length=100, pattern="^[a-z0-9-]+$")
+    organization_id: int = Field(..., gt=0)
+    role: str = Field(default="MEMBER", pattern="^(ORG_ADMIN|PROJECT_MANAGER|MEMBER)$")
 
 
 class RegisterResponse(BaseModel):

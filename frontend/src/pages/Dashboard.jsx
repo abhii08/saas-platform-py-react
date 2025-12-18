@@ -124,25 +124,27 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="bg-white shadow rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {isManager && (
+        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="lg:col-span-3 bg-white rounded-lg border-2 border-gray-100 p-4 hover:border-gray-200 transition-all duration-200">
+            <h2 className="text-base font-semibold text-gray-900 mb-3">Quick Actions</h2>
+            <div className="space-y-2">
+              {isManager && (
+                <button 
+                  onClick={() => setIsModalOpen(true)}
+                  className="w-full flex items-center justify-center px-4 py-2.5 border border-transparent text-sm font-semibold rounded-lg text-white bg-[#2563EB] hover:bg-[#1d4ed8] shadow-sm hover:shadow-md transition-all duration-200"
+                >
+                  Create New Project
+                </button>
+              )}
               <button 
-                onClick={() => setIsModalOpen(true)}
-                className="flex items-center justify-center px-4 py-3 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90"
+                onClick={() => setIsTaskModalOpen(true)}
+                disabled={boards.length === 0}
+                className="w-full flex items-center justify-center px-4 py-2.5 border-2 border-[#D1D5DB] text-sm font-medium rounded-lg text-[#374151] bg-white hover:bg-gray-50 hover:border-gray-400 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                title={boards.length === 0 ? 'Create a project and board first' : 'Add a new task'}
               >
-                Create New Project
+                Add Task
               </button>
-            )}
-            <button 
-              onClick={() => setIsTaskModalOpen(true)}
-              disabled={boards.length === 0}
-              className="flex items-center justify-center px-4 py-3 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-              title={boards.length === 0 ? 'Create a project and board first' : 'Add a new task'}
-            >
-              Add Task
-            </button>
+            </div>
           </div>
         </div>
       </div>

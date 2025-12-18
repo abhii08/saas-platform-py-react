@@ -17,13 +17,13 @@ class AuthService:
     @staticmethod
     def register_user(db: Session, data: RegisterRequest) -> Dict[str, Any]:
         """
-        Register a new user and create their organization.
+        Register a new user and join an existing organization.
         
         This is a multi-step transaction:
         1. Check if email already exists
-        2. Create new organization
+        2. Verify organization exists and is active
         3. Create new user
-        4. Assign ORG_ADMIN role to user
+        4. Assign selected role to user in the organization
         5. Generate JWT tokens
         
         Args:
@@ -34,7 +34,7 @@ class AuthService:
             Dictionary with user_id, organization_id, and tokens
             
         Raises:
-            HTTPException: If email already exists or slug is taken
+            HTTPException: If email already exists or organization not found
         """
         existing_user = db.query(User).filter(User.email == data.email).first()
         if existing_user:
@@ -43,20 +43,15 @@ class AuthService:
                 detail="Email already registered"
             )
         
-        existing_org = db.query(Organization).filter(Organization.slug == data.organization_slug).first()
-        if existing_org:
+        organization = db.query(Organization).filter(
+            Organization.id == data.organization_id,
+            Organization.is_active == True
+        ).first()
+        if not organization:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Organization slug already taken"
+                detail="Organization not found or inactive"
             )
-        
-        organization = Organization(
-            name=data.organization_name,
-            slug=data.organization_slug,
-            is_active=True
-        )
-        db.add(organization)
-        db.flush()
         
         user = User(
             email=data.email,
@@ -69,16 +64,16 @@ class AuthService:
         db.add(user)
         db.flush()
         
-        admin_role = db.query(Role).filter(Role.name == "ORG_ADMIN").first()
-        if not admin_role:
-            admin_role = Role(name="ORG_ADMIN", description="Organization Administrator")
-            db.add(admin_role)
+        selected_role = db.query(Role).filter(Role.name == data.role).first()
+        if not selected_role:
+            selected_role = Role(name=data.role, description=f"{data.role.replace('_', ' ').title()}")
+            db.add(selected_role)
             db.flush()
         
         user_org = UserOrganization(
             user_id=user.id,
             organization_id=organization.id,
-            role_id=admin_role.id,
+            role_id=selected_role.id,
             is_active=True
         )
         db.add(user_org)
@@ -90,7 +85,7 @@ class AuthService:
             "first_name": user.first_name,
             "last_name": user.last_name,
             "organization_id": organization.id,
-            "role": "ORG_ADMIN"
+            "role": data.role
         }
         
         access_token = create_access_token(token_data)

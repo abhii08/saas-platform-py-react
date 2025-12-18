@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { UserPlus } from 'lucide-react'
+import api from '../api/axios'
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -9,29 +10,54 @@ const Register = () => {
     password: '',
     first_name: '',
     last_name: '',
-    organization_name: '',
-    organization_slug: ''
+    organization_id: '',
+    role: ''
   })
+  const [organizations, setOrganizations] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [loadingOrgs, setLoadingOrgs] = useState(true)
   const { register } = useAuth()
+
+  useEffect(() => {
+    const fetchOrganizations = async () => {
+      try {
+        const response = await api.get('/organizations/public')
+        setOrganizations(response.data)
+      } catch (err) {
+        setError('Failed to load organizations. Please refresh the page.')
+      } finally {
+        setLoadingOrgs(false)
+      }
+    }
+    fetchOrganizations()
+  }, [])
 
   const handleChange = (e) => {
     const { name, value } = e.target
     setFormData(prev => ({ ...prev, [name]: value }))
-    
-    if (name === 'organization_name' && !formData.organization_slug) {
-      const slug = value.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
-      setFormData(prev => ({ ...prev, organization_slug: slug }))
-    }
   }
 
   const handleSubmit = async (e) => {
     e.preventDefault()
     setError('')
+    
+    if (!formData.organization_id) {
+      setError('Please select an organization')
+      return
+    }
+    
+    if (!formData.role) {
+      setError('Please select a role')
+      return
+    }
+    
     setLoading(true)
 
-    const result = await register(formData)
+    const result = await register({
+      ...formData,
+      organization_id: parseInt(formData.organization_id)
+    })
     
     if (!result.success) {
       setError(result.error)
@@ -97,26 +123,53 @@ const Register = () => {
               className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
               placeholder="Password (min 8 characters)"
             />
-            <div className="border-t pt-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Organization Details</p>
-              <input
-                name="organization_name"
-                type="text"
+            <div>
+              <label htmlFor="organization_id" className="block text-sm font-medium text-gray-700 mb-1">
+                Organization
+              </label>
+              <select
+                name="organization_id"
+                id="organization_id"
                 required
-                value={formData.organization_name}
+                value={formData.organization_id}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm mb-2"
-                placeholder="Organization name"
-              />
-              <input
-                name="organization_slug"
-                type="text"
+                disabled={loadingOrgs}
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <option value="">Select an organization</option>
+                {organizations.map((org) => (
+                  <option key={org.id} value={org.id}>
+                    {org.name}
+                  </option>
+                ))}
+              </select>
+              {loadingOrgs && (
+                <p className="text-xs text-gray-500 mt-1">Loading organizations...</p>
+              )}
+            </div>
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                Role
+              </label>
+              <select
+                name="role"
+                id="role"
                 required
-                value={formData.organization_slug}
+                value={formData.role}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-                placeholder="organization-slug"
-              />
+                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+              >
+                <option value="">Select your role</option>
+                <option value="MEMBER">Member</option>
+                <option value="PROJECT_MANAGER">Project Manager</option>
+                <option value="ORG_ADMIN">Organization Admin</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">
+                {formData.role === 'MEMBER' && 'View and contribute to assigned tasks'}
+                {formData.role === 'PROJECT_MANAGER' && 'Manage projects and teams'}
+                {formData.role === 'ORG_ADMIN' && 'Full access to organization settings'}
+                {!formData.role && 'Choose the role that best fits your responsibilities'}
+              </p>
             </div>
           </div>
 

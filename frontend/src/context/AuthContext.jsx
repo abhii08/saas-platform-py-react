@@ -73,9 +73,19 @@ export const AuthProvider = ({ children }) => {
       navigate('/dashboard')
       return { success: true }
     } catch (error) {
+      let errorMessage = 'Registration failed'
+      
+      if (error.response?.data?.detail) {
+        if (Array.isArray(error.response.data.detail)) {
+          errorMessage = error.response.data.detail.map(err => err.msg).join(', ')
+        } else if (typeof error.response.data.detail === 'string') {
+          errorMessage = error.response.data.detail
+        }
+      }
+      
       return { 
         success: false, 
-        error: error.response?.data?.detail || 'Registration failed' 
+        error: errorMessage
       }
     }
   }

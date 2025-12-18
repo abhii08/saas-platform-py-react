@@ -10,6 +10,20 @@ from app.organizations.service import OrganizationService
 router = APIRouter(prefix="/organizations", tags=["Organizations"])
 
 
+@router.get("/public", response_model=List[OrganizationResponse])
+async def list_organizations_public(
+    db: Session = Depends(get_db)
+):
+    """
+    List all active organizations (public endpoint for registration).
+    
+    This endpoint does not require authentication and is used during user registration
+    to allow users to select an organization to join.
+    """
+    organizations = OrganizationService.list_organizations(db, skip=0, limit=100)
+    return organizations
+
+
 @router.post("/", response_model=OrganizationResponse, status_code=status.HTTP_201_CREATED)
 async def create_organization(
     data: OrganizationCreate,
