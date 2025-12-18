@@ -87,6 +87,8 @@ class AuthService:
         token_data = {
             "user_id": user.id,
             "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
             "organization_id": organization.id,
             "role": "ORG_ADMIN"
         }
@@ -154,6 +156,8 @@ class AuthService:
         token_data = {
             "user_id": user.id,
             "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
             "organization_id": user_org.organization_id,
             "role": role.name
         }
@@ -216,6 +220,8 @@ class AuthService:
         token_data = {
             "user_id": user.id,
             "email": user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
             "organization_id": user_org.organization_id,
             "role": role.name
         }

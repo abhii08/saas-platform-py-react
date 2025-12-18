@@ -30,6 +30,8 @@ export const AuthProvider = ({ children }) => {
       const userData = {
         user_id: payload.user_id,
         email: payload.email,
+        first_name: payload.first_name,
+        last_name: payload.last_name,
         organization_id: payload.organization_id,
         role: payload.role
       }
@@ -59,6 +61,8 @@ export const AuthProvider = ({ children }) => {
       const userData = {
         user_id: payload.user_id,
         email: payload.email,
+        first_name: payload.first_name,
+        last_name: payload.last_name,
         organization_id: payload.organization_id,
         role: payload.role
       }

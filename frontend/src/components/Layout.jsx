@@ -8,7 +8,7 @@ const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#EEF1F5' }}>
       <nav className="bg-white border-b border-gray-200 fixed w-full z-30 top-0">
         <div className="px-3 py-3 lg:px-5 lg:pl-3">
           <div className="flex items-center justify-between">
@@ -47,9 +47,10 @@ const Layout = ({ children }) => {
       <aside
         className={`fixed top-0 left-0 z-20 w-64 h-screen pt-20 transition-transform ${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } bg-white border-r border-gray-200 lg:translate-x-0`}
+        } border-r border-gray-200 lg:translate-x-0`}
+        style={{ backgroundColor: '#F7F9FC' }}
       >
-        <div className="h-full px-3 pb-4 overflow-y-auto bg-white">
+        <div className="h-full px-3 pb-4 overflow-y-auto" style={{ backgroundColor: '#F7F9FC' }}>
           <ul className="space-y-2 font-medium">
             <li>
               <Link
