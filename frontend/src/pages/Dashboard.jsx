@@ -83,9 +83,9 @@ const Dashboard = () => {
   }
 
   const statCards = [
-    { title: 'Total Projects', value: stats.projects, icon: FolderKanban, color: 'bg-blue-500' },
-    { title: 'Active Tasks', value: stats.tasks, icon: CheckSquare, color: 'bg-green-500' },
-    { title: 'Team Members', value: stats.members, icon: Users, color: 'bg-purple-500' }
+    { title: 'Total Projects', value: stats.projects, icon: FolderKanban, iconColor: 'text-blue-600', borderColor: 'border-blue-200', hoverBorder: 'hover:border-blue-300' },
+    { title: 'Active Tasks', value: stats.tasks, icon: CheckSquare, iconColor: 'text-green-600', borderColor: 'border-green-200', hoverBorder: 'hover:border-green-300' },
+    { title: 'Team Members', value: stats.members, icon: Users, iconColor: 'text-purple-600', borderColor: 'border-purple-200', hoverBorder: 'hover:border-purple-300' }
   ]
 
   return (
@@ -102,13 +102,13 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
           {statCards.map((stat, index) => (
-            <div key={index} className="bg-white overflow-hidden shadow rounded-lg">
+            <div key={index} className={`bg-white overflow-hidden rounded-lg border-2 ${stat.borderColor} ${stat.hoverBorder} transition-all duration-200 hover:shadow-md`}>
               <div className="p-5">
                 <div className="flex items-center">
-                  <div className={`flex-shrink-0 ${stat.color} rounded-md p-3`}>
-                    <stat.icon className="h-6 w-6 text-white" />
+                  <div className="flex-shrink-0 bg-white rounded-md p-2 border border-gray-100">
+                    <stat.icon className={`h-[18px] w-[18px] ${stat.iconColor}`} />
                   </div>
-                  <div className="ml-5 w-0 flex-1">
+                  <div className="ml-4 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">
                         {stat.title}

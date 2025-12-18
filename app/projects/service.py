@@ -92,8 +92,7 @@ class ProjectService:
             Tuple of (projects list, total count)
         """
         query = db.query(Project).filter(
-            Project.organization_id == organization_id,
-            Project.is_active == True
+            Project.organization_id == organization_id
         )
         total = query.count()
         projects = query.offset(skip).limit(limit).all()
