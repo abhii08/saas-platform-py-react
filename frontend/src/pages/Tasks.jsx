@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../components/Layout'
+import { useAuth } from '../context/AuthContext'
 import TaskModal from '../components/TaskModal'
 import api from '../api/axios'
 import { CheckSquare, Edit, Trash2 } from 'lucide-react'
 
 const Tasks = () => {
   const navigate = useNavigate()
+  const { isManager, role } = useAuth()
   const [tasks, setTasks] = useState([])
   const [projects, setProjects] = useState([])
   const [boards, setBoards] = useState([])
@@ -183,15 +185,17 @@ const Tasks = () => {
                         )}
                       </div>
                     </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDeleteTask(task.id)
-                      }}
-                      className="text-red-600 hover:text-red-800 ml-4"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    {isManager && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteTask(task.id)
+                        }}
+                        className="text-red-600 hover:text-red-800 ml-4"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

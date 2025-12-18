@@ -326,15 +326,17 @@ const ProjectDetail = () => {
                               <p className="text-xs text-gray-500 mt-1">{task.description}</p>
                             )}
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDeleteTask(task.id, board.id)
-                            }}
-                            className="text-red-600 hover:text-red-800"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          {isManager && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleDeleteTask(task.id, board.id)
+                              }}
+                              className="text-red-600 hover:text-red-800"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          )}
                         </div>
                       ))
                     ) : (

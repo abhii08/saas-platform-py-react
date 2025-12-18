@@ -71,9 +71,18 @@ async def update_task(
     """
     Update task.
     
-    All members can update tasks.
+    RBAC Rules:
+    - ORG_ADMIN and PROJECT_MANAGER: Can update any task
+    - MEMBER: Can only update tasks they created or are assigned to
     """
-    task = TaskService.update_task(db, task_id, data, tenant_id)
+    task = TaskService.update_task(
+        db, 
+        task_id, 
+        data, 
+        tenant_id, 
+        user_id=current_user["user_id"],
+        user_role=current_user.get("role")
+    )
     return task
 
 
@@ -87,6 +96,15 @@ async def delete_task(
     """
     Delete task.
     
-    All members can delete tasks.
+    RBAC Rules:
+    - ORG_ADMIN: Can delete any task
+    - PROJECT_MANAGER: Can delete any task
+    - MEMBER: NOT ALLOWED to delete tasks
     """
-    TaskService.delete_task(db, task_id, tenant_id)
+    TaskService.delete_task(
+        db, 
+        task_id, 
+        tenant_id,
+        user_id=current_user["user_id"],
+        user_role=current_user.get("role")
+    )

@@ -115,20 +115,38 @@ class TaskService:
         return query.order_by(Task.position, Task.created_at).all()
     
     @staticmethod
-    def update_task(db: Session, task_id: int, data: TaskUpdate, organization_id: int) -> Task:
+    def update_task(db: Session, task_id: int, data: TaskUpdate, organization_id: int, user_id: int = None, user_role: str = None) -> Task:
         """
-        Update task with tenant isolation.
+        Update task with tenant isolation and ownership validation.
+        
+        RBAC Rules:
+        - ORG_ADMIN: Can update any task
+        - PROJECT_MANAGER: Can update any task
+        - MEMBER: Can only update tasks they created or are assigned to
         
         Args:
             db: Database session
             task_id: Task ID
             data: Update data
             organization_id: Current tenant ID
+            user_id: ID of user making the update (for MEMBER validation)
+            user_role: Role of user making the update
             
         Returns:
             Updated task
+            
+        Raises:
+            HTTPException: If MEMBER tries to update someone else's task
         """
         task = TaskService.get_task(db, task_id, organization_id)
+        
+        # MEMBER role can only update their own tasks (created by them or assigned to them)
+        if user_role == "MEMBER" and user_id:
+            if task.created_by != user_id and task.assigned_to != user_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Members can only update tasks they created or are assigned to"
+                )
         
         update_data = data.model_dump(exclude_unset=True)
         
@@ -153,15 +171,33 @@ class TaskService:
         return task
     
     @staticmethod
-    def delete_task(db: Session, task_id: int, organization_id: int) -> None:
+    def delete_task(db: Session, task_id: int, organization_id: int, user_id: int = None, user_role: str = None) -> None:
         """
-        Delete task (hard delete) with tenant isolation.
+        Delete task (hard delete) with tenant isolation and role validation.
+        
+        RBAC Rules:
+        - ORG_ADMIN: Can delete any task
+        - PROJECT_MANAGER: Can delete any task
+        - MEMBER: NOT ALLOWED to delete tasks
         
         Args:
             db: Database session
             task_id: Task ID
             organization_id: Current tenant ID
+            user_id: ID of user making the deletion
+            user_role: Role of user making the deletion
+            
+        Raises:
+            HTTPException: If MEMBER tries to delete any task
         """
         task = TaskService.get_task(db, task_id, organization_id)
+        
+        # MEMBER role is NOT allowed to delete any tasks
+        if user_role == "MEMBER":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Members are not allowed to delete tasks"
+            )
+        
         db.delete(task)
         db.commit()
