@@ -94,7 +94,7 @@ const Register = () => {
                   type="text"
                   value={formData.first_name}
                   onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                  className="appearance-none relative block w-full px-3 py-2 border border-slate-700 placeholder-slate-300 text-slate-100 bg-slate-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="First name"
                 />
                 <input
@@ -102,7 +102,7 @@ const Register = () => {
                   type="text"
                   value={formData.last_name}
                   onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                  className="appearance-none relative block w-full px-3 py-2 border border-slate-700 placeholder-slate-300 text-slate-100 bg-slate-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                   placeholder="Last name"
                 />
               </div>
@@ -112,7 +112,7 @@ const Register = () => {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                className="appearance-none relative block w-full px-3 py-2 border border-slate-700 placeholder-slate-300 text-slate-100 bg-slate-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Email address"
               />
               <input
@@ -121,7 +121,7 @@ const Register = () => {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                className="appearance-none relative block w-full px-3 py-2 border border-slate-700 placeholder-slate-300 text-slate-100 bg-slate-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 placeholder="Password (min 8 characters)"
               />
               <div>
@@ -135,7 +135,7 @@ const Register = () => {
                   value={formData.organization_id}
                   onChange={handleChange}
                   disabled={loadingOrgs}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="appearance-none relative block w-full px-3 py-2 border border-slate-700 text-slate-100 bg-slate-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-slate-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <option value="">Select an organization</option>
                   {organizations.map((org) => (
@@ -158,7 +158,7 @@ const Register = () => {
                   required
                   value={formData.role}
                   onChange={handleChange}
-                  className="appearance-none relative block w-full px-3 py-2 border border-gray-300 text-gray-900 rounded-md focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
+                  className="appearance-none relative block w-full px-3 py-2 border border-slate-700 text-slate-100 bg-slate-700 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm placeholder-slate-300"
                 >
                   <option value="">Select your role</option>
                   <option value="MEMBER">Member</option>
@@ -176,7 +176,7 @@ const Register = () => {
 
             <button
               disabled={loading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
+              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-slate-900 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-800 disabled:opacity-50"
             >
               <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                 <UserPlus className="h-5 w-5 text-primary-foreground" />
@@ -186,7 +186,7 @@ const Register = () => {
           </form>
         </div>
       </div>
-      <aside className="hidden md:flex items-center justify-center bg-slate-100 p-8 md:border-l md:border-slate-200">
+      <aside className="hidden md:flex items-center justify-center bg-slate-200 p-8 md:border-l md:border-slate-200">
         <div className="max-w-xl mx-auto px-6">
           <p className="text-slate-800 text-2xl md:text-3xl font-bold leading-snug">
             “Designed for multi-tenant SaaS environments, this platform ensures secure organizational separation while delivering powerful tools for tasks, roles, boards, and project operations.”
